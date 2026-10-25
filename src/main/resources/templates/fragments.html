@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+    <head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="${title} + ' | FutureMe'">FutureMe</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <link rel="stylesheet" th:href="@{/css/anime-theme.css}">
+</head>
+<body>
+ 
+
+<header class="site-header" th:fragment="navbar">
+    <div class="container header-inner">
+        <a class="brand" th:href="@{/letters}">
+            <span class="brand-icon">&#9993;</span> FutureMe
+        </a>
+
+        <nav class="nav">
+            <!-- Only visible when logged in -->
+            <div sec:authorize="isAuthenticated()" class="fm-user-nav">
+                <a class="nav-link" th:href="@{/letters}">My letters</a>
+
+                <details class="fm-profile">
+                    <summary aria-label="Open profile menu">
+                        <span class="fm-profile-avatar" aria-hidden="true">♡</span>
+                        <span class="fm-profile-label">My profile</span>
+                        <span aria-hidden="true">⌄</span>
+                    </summary>
+
+                    <div class="fm-profile-menu">
+                        <p class="fm-profile-heading">Your little corner ✨</p>
+                        <p class="fm-profile-subtitle">A tiny space for your future self 💌</p>
+                        <p class="fm-profile-email"
+                           sec:authentication="name">your@email.com</p>
+
+                        <a th:href="@{/letters/new}">Write a letter</a>
+
+                        <form th:action="@{/logout}" method="post">
+                            <button type="submit" class="fm-logout-button">
+                                Log out
+                            </button>
+                        </form>
+                    </div>
+                </details>
+            </div>
+
+            <!-- Only visible when logged out -->
+            
+        </nav>
+    </div>
+</header>
+
+ 
+<footer class="site-footer" th:fragment="footer">
+    <div class="container">
+        <p>FutureMe &middot; a local demonstration project &middot; please do not store sensitive secrets</p>
+    </div>
+</footer>
+<script th:src="@{/js/futureme-gamification.js}" defer></script>
+</body>
+</html>

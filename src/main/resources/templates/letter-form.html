@@ -1,0 +1,218 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${pageTitle})}"></head>
+<body>
+<header th:replace="~{fragments :: navbar}"></header>
+
+<main class="container narrow fm-writing-page">
+
+    <section class="fm-writing-hero">
+        <div class="fm-writing-icon" aria-hidden="true">💌</div>
+
+        <p class="fm-eyebrow">A little note through time ✨</p>
+
+        <h1 th:text="${editMode} ? 'Edit your letter' : 'Write to your future self'">
+            Write to your future self
+        </h1>
+
+        <p class="muted" th:unless="${editMode}">
+            A thought, a dream, a promise to yourself.
+            Write it today and let your future self discover it someday.
+        </p>
+
+        <p class="muted" th:if="${editMode}">
+            Every word holds a little piece of your story.
+            Make the changes you need.
+        </p>
+
+        <div class="fm-writing-stars" aria-hidden="true">
+            ✧　♡　✦　✧　♡
+        </div>
+    </section>
+
+    <div class="alert alert-info fm-privacy-note" th:if="${editMode}">
+        <span aria-hidden="true">🔒</span>
+        <div>
+            <strong>Your sealed letter stays private.</strong>
+            <p>
+                Leave the message box empty to keep your existing message,
+                or type new text to replace it.
+            </p>
+        </div>
+    </div>
+
+    <form class="form-card fm-writing-card"
+          method="post"
+          novalidate
+          th:action="@{${formAction}}"
+          th:object="${letterForm}">
+
+        <div class="alert alert-error" th:if="${#fields.hasErrors('*')}">
+            Please fix the problems highlighted below.
+        </div>
+
+        <div class="fm-form-heading">
+            <span class="fm-section-icon" aria-hidden="true">🖋️</span>
+            <div>
+                <h2>Your letter</h2>
+                <p class="muted">Let your thoughts find their way onto the page.</p>
+            </div>
+        </div>
+
+        <div class="field fm-field">
+            <label for="title">Give your letter a name ✨</label>
+
+            <input type="text"
+                   id="title"
+                   maxlength="150"
+                   placeholder="A letter to me, one year from now..."
+                   th:field="*{title}"
+                   th:classappend="${#fields.hasErrors('title')} ? 'invalid'">
+
+            <p class="field-error"
+               th:if="${#fields.hasErrors('title')}"
+               th:errors="*{title}">Title error</p>
+        </div>
+
+        <div class="field fm-field">
+            <div class="fm-label-row">
+                <label for="content"
+                       th:text="${editMode} ? 'Your message (optional)' : 'Pour your heart out ♡'">
+                    Your message
+                </label>
+
+                <span class="fm-character-count"
+                      aria-live="polite">
+                    <span id="fm-character-count">0</span> characters
+                </span>
+            </div>
+
+            <textarea id="content"
+                      rows="10"
+                      placeholder="Dear future me,
+
+I hope you're taking care of yourself...
+Remember the dreams you have today..."
+                      th:field="*{content}"
+                      th:classappend="${#fields.hasErrors('content')} ? 'invalid'"></textarea>
+
+            <p class="hint" th:if="${editMode}">
+                Leave this empty if you don't want to replace your existing message.
+            </p>
+
+            <p class="field-error"
+               th:if="${#fields.hasErrors('content')}"
+               th:errors="*{content}">Message error</p>
+        </div>
+
+        <div class="fm-unlock-section">
+            <div class="fm-form-heading">
+                <span class="fm-section-icon" aria-hidden="true">🌙</span>
+                <div>
+                    <h2>Choose your moment</h2>
+                    <p class="muted">When should your future self open this letter?</p>
+                </div>
+            </div>
+
+            <div class="field fm-field">
+                <label for="unlockAt">Unlock date and time</label>
+
+                <input type="datetime-local"
+                       id="unlockAt"
+                       th:field="*{unlockAt}"
+                       th:attr="min=${minUnlock}"
+                       th:classappend="${#fields.hasErrors('unlockAt')} ? 'invalid'">
+
+                <p class="hint">
+                    Times use the server time zone, which is Asia/Kolkata
+                    unless you changed app.timezone.
+                </p>
+
+                <p class="fm-date-preview"
+                   id="fm-date-preview"
+                   aria-live="polite">
+                    ✨ Your chosen opening moment will appear here.
+                </p>
+
+                <p class="field-error"
+                   th:if="${#fields.hasErrors('unlockAt')}"
+                   th:errors="*{unlockAt}">Date error</p>
+            </div>
+        </div>
+
+        <div class="fm-writing-reminder">
+            <span aria-hidden="true">🧚🏻‍♀️</span>
+            <p>
+                A little reminder: you don't need to have everything figured out.
+                Just write what your heart wants your future self to remember.
+            </p>
+        </div>
+
+        <div class="form-actions fm-writing-actions">
+            <button type="submit"
+                    class="btn btn-primary fm-seal-button"
+                    th:text="${editMode} ? 'Save my changes ✨' : 'Seal my letter 💌'">
+                Seal my letter
+            </button>
+
+            <a class="btn btn-ghost"
+               th:href="@{${cancelUrl}}">
+                Cancel
+            </a>
+        </div>
+    </form>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+
+<script th:src="@{/js/app.js}" defer></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const message = document.getElementById("content");
+    const counter = document.getElementById("fm-character-count");
+    const unlockInput = document.getElementById("unlockAt");
+    const datePreview = document.getElementById("fm-date-preview");
+
+    if (message && counter) {
+        function updateCount() {
+            counter.textContent = message.value.length;
+        }
+
+        message.addEventListener("input", updateCount);
+        updateCount();
+    }
+
+    if (unlockInput && datePreview) {
+        function updateDatePreview() {
+            if (!unlockInput.value) {
+                datePreview.textContent =
+                    "✨ Your chosen opening moment will appear here.";
+                return;
+            }
+
+            const date = new Date(unlockInput.value);
+
+            if (Number.isNaN(date.getTime())) {
+                datePreview.textContent =
+                    "Please choose a valid date and time.";
+                return;
+            }
+
+            datePreview.textContent =
+                "✨ Your letter is scheduled for " +
+                new Intl.DateTimeFormat(undefined, {
+                    dateStyle: "long",
+                    timeStyle: "short"
+                }).format(date) + ".";
+        }
+
+        unlockInput.addEventListener("input", updateDatePreview);
+        unlockInput.addEventListener("change", updateDatePreview);
+        updateDatePreview();
+    }
+});
+</script>
+</body>
+</html>

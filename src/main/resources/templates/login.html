@@ -1,0 +1,46 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Log in')}"></head>
+<body>
+<header th:replace="~{fragments :: navbar}"></header>
+
+<main class="container fm-auth-page">
+    <section class="fm-auth-card">
+        <p class="fm-eyebrow">WELCOME BACK ✧</p>
+        <h1>Your future is waiting 💜</h1>
+        <p class="muted">Log in to revisit your letters.</p>
+
+        <p class="fm-auth-message" th:if="${param.registered}">
+            Your account is ready! Please log in.
+        </p>
+        <p class="fm-auth-error" th:if="${param.error}">
+            That email or password wasn't recognised.
+        </p>
+        <p class="fm-auth-message" th:if="${param.logout}">
+            You've logged out successfully.
+        </p>
+
+        <form th:action="@{/login}" method="post" class="fm-auth-form">
+            <label for="email">Email address</label>
+            <input id="email" name="email" type="email"
+                   autocomplete="email" required>
+
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password"
+                   autocomplete="current-password" required>
+
+            <button type="submit" class="btn btn-primary">
+                Log in ✨
+            </button>
+        </form>
+
+        <p class="fm-auth-switch">
+            New here? <a th:href="@{/signup}">Create an account</a>
+        </p>
+    </section>
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>

@@ -1,0 +1,223 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head(${letter.title})}"></head>
+<body>
+<header th:replace="~{fragments :: navbar}"></header>
+
+<main class="container narrow">
+
+    <div class="alert alert-success"
+         th:if="${successMessage}"
+         th:text="${successMessage}">
+        Saved.
+    </div>
+
+    <article class="letter-card fm-reading-card">
+
+        <div class="fm-reading-sparkles" aria-hidden="true">
+            <span>✧</span>
+            <span>♡</span>
+            <span>✦</span>
+            <span>✧</span>
+        </div>
+
+        <div class="letter-head fm-letter-head">
+
+            <span class="badge badge-locked" th:if="${letter.locked}">
+                🔒 Locked
+            </span>
+
+            <span class="badge badge-unlocked" th:unless="${letter.locked}">
+                🔓 Unlocked
+            </span>
+
+            <h1 class="fm-reading-title" th:text="${letter.title}">
+                Letter title
+            </h1>
+
+            <p class="muted fm-letter-date">
+                Written on
+                <span th:text="${#temporals.format(letter.createdAt, 'dd MMM yyyy, HH:mm')}">
+                    01 Jan 2026, 10:00
+                </span>
+            </p>
+
+        </div>
+
+        <!-- Locked letters never display their private message -->
+        <section class="sealed-panel fm-sealed-panel"
+                 th:if="${letter.locked}">
+
+            <div class="fm-seal-icon" aria-hidden="true">💌</div>
+
+            <h2>This letter is sealed</h2>
+
+            <p>
+                A little message from your past self is waiting for you.
+            </p>
+
+            <p>
+                It can be opened on
+                <strong th:text="${#temporals.format(letter.unlockAt, 'EEEE, dd MMMM yyyy')}">
+                    Friday, 01 January 2027
+                </strong>
+                at
+                <strong th:text="${#temporals.format(letter.unlockAt, 'HH:mm')}">
+                    10:00
+                </strong>.
+            </p>
+
+            <p class="countdown countdown-large"
+               th:attr="data-seconds=${letter.secondsRemaining}">
+                Calculating...
+            </p>
+
+            <p class="hint">
+                Your message stays private until its unlock time.
+            </p>
+
+        </section>
+
+        <!-- Unlocked letter -->
+        <section class="letter-paper fm-letter-paper"
+                 th:unless="${letter.locked}">
+
+            <p class="muted fm-unlocked-date">
+                ✨ Unlocked on
+                <span th:text="${#temporals.format(letter.unlockAt, 'dd MMM yyyy, HH:mm')}">
+                    01 Jan 2026, 10:00
+                </span>
+            </p>
+
+            <div class="fm-paper-divider" aria-hidden="true">
+                ✧ ── ♡ ── ✧
+            </div>
+
+            <div class="letter-body fm-letter-body"
+                 th:text="${letter.content}">
+                The message appears here.
+            </div>
+
+            <div class="fm-paper-ending" aria-hidden="true">
+                With love, from a past version of you ♡
+            </div>
+
+        </section>
+
+        <p class="hint fm-edited-date"
+           th:if="${letter.updatedAt != null}">
+            Last edited on
+            <span th:text="${#temporals.format(letter.updatedAt, 'dd MMM yyyy, HH:mm')}">
+                01 Jan 2026, 10:00
+            </span>
+        </p>
+
+    </article>
+
+    <!-- Reading page actions -->
+    <div class="detail-actions">
+
+        <a class="btn btn-ghost" th:href="@{/letters}">
+            &larr; Back to my letters
+        </a>
+
+        <a class="btn btn-secondary"
+           th:if="${letter.locked}"
+           th:href="@{/letters/{id}/edit(id=${letter.id})}">
+            Edit
+        </a>
+
+        <button type="button"
+                class="btn btn-danger"
+                id="fm-delete-trigger">
+            Delete
+        </button>
+
+    </div>
+
+    <!-- Magical delete confirmation popup -->
+    <dialog class="fm-delete-dialog"
+            id="fm-delete-dialog"
+            aria-labelledby="fm-delete-title"
+            aria-describedby="fm-delete-description">
+
+        <div class="fm-delete-decoration" aria-hidden="true">
+            ✧ ♡ ✧
+        </div>
+
+        <div class="fm-delete-icon" aria-hidden="true">
+            💌
+        </div>
+
+        <h2 id="fm-delete-title">
+            Let this letter go?
+        </h2>
+
+        <p id="fm-delete-description">
+            This little piece of your journey will be gone forever.
+            Are you sure you want to delete it?
+        </p>
+
+        <div class="fm-delete-actions">
+
+            <button type="button"
+                    class="btn btn-ghost"
+                    id="fm-delete-cancel">
+                Keep my letter ♡
+            </button>
+
+            <!-- Submit directly to the existing POST delete route -->
+            <form method="post"
+                  th:action="@{/letters/{id}/delete(id=${letter.id})}">
+
+                <button type="submit"
+                        class="btn btn-danger fm-delete-confirm">
+                    Yes, delete it
+                </button>
+
+            </form>
+
+        </div>
+
+    </dialog>
+
+</main>
+
+<footer th:replace="~{fragments :: footer}"></footer>
+
+<script th:src="@{/js/app.js}" defer></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const trigger = document.getElementById("fm-delete-trigger");
+    const dialog = document.getElementById("fm-delete-dialog");
+    const cancel = document.getElementById("fm-delete-cancel");
+
+    if (!trigger || !dialog || !cancel) {
+        return;
+    }
+
+    trigger.addEventListener("click", function () {
+        if (typeof dialog.showModal === "function") {
+            dialog.showModal();
+        }
+    });
+
+    cancel.addEventListener("click", function () {
+        dialog.close();
+        trigger.focus();
+    });
+
+    // Close the popup when the user clicks outside its panel.
+    dialog.addEventListener("click", function (event) {
+        if (event.target === dialog) {
+            dialog.close();
+            trigger.focus();
+        }
+    });
+});
+</script>
+
+</body>
+</html>

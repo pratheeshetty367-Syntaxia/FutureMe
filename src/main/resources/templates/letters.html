@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('My letters')}"></head>
+<body>
+<header th:replace="~{fragments :: navbar}"></header>
+ 
+<main class="container">
+    
+<section class="fm-hero fm-dashboard-hero" data-fm-hero>
+    <div class="page-header fm-dashboard-heading">
+        <div class="fm-dashboard-welcome">
+            <div class="fm-mascot fm-fairy">
+                <img src="/images/fairy-mascot.png"
+                     alt=""
+                     aria-hidden="true">
+            </div>
+
+            <p class="fm-eyebrow">A LITTLE SPACE JUST FOR YOU ✧</p>
+
+            <h1>My letters <span aria-hidden="true">✨</span></h1>
+
+            <p class="muted fm-dashboard-subtitle">
+                Every letter is a little gift to the person you're becoming.
+                Keep your dreams, wishes, and memories safe until the right time.
+            </p>
+
+            <a class="btn btn-primary fm-write-button"
+               th:href="@{/letters/new}">
+                <span aria-hidden="true">✉</span>
+                Write a new letter
+                <span aria-hidden="true">♡</span>
+            </a>
+        </div>
+    </div>
+
+    <div class="fm-hero-decoration" aria-hidden="true">
+        <span class="fm-orbit-star">✧</span>
+        <span class="fm-orbit-heart">♡</span>
+        <span class="fm-orbit-sparkle">✦</span>
+    </div>
+</section>
+
+ 
+    <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}">Saved.</div>
+ 
+    <!-- Friendly empty state -->
+    <section class="empty-state" th:if="${#lists.isEmpty(letters)}">
+        <div class="empty-icon">&#9993;</div>
+        <h2>No letters yet</h2>
+        <p>Write your first letter and choose the day it should open. Your future self will thank you.</p>
+        <a class="btn btn-primary" th:href="@{/letters/new}">Write your first letter</a>
+    </section>
+ 
+    <!-- Letter cards -->
+    <section class="card-grid" th:unless="${#lists.isEmpty(letters)}">
+        <article class="card" th:each="letter : ${letters}"
+                 th:classappend="${letter.locked} ? 'card-locked' : 'card-unlocked'">
+            <div class="card-top">
+                <span class="badge badge-locked" th:if="${letter.locked}">&#128274; Locked</span>
+                <span class="badge badge-unlocked" th:unless="${letter.locked}">&#128275; Unlocked</span>
+            </div>
+            <h2 class="card-title" th:text="${letter.title}">Letter title</h2>
+            <p class="card-line">Written:
+                <span th:text="${#temporals.format(letter.createdAt, 'dd MMM yyyy, HH:mm')}">01 Jan 2026, 10:00</span>
+            </p>
+            <p class="card-line" th:if="${letter.locked}">Opens:
+                <span th:text="${#temporals.format(letter.unlockAt, 'dd MMM yyyy, HH:mm')}">01 Jan 2027, 10:00</span>
+            </p>
+            <p class="card-line" th:unless="${letter.locked}">Opened:
+                <span th:text="${#temporals.format(letter.unlockAt, 'dd MMM yyyy, HH:mm')}">01 Jan 2026, 10:00</span>
+            </p>
+            <p class="countdown" th:if="${letter.locked}"
+               th:attr="data-seconds=${letter.secondsRemaining}">Calculating...</p>
+            <a class="btn btn-secondary btn-block"
+               th:href="@{/letters/{id}(id=${letter.id})}"
+               th:text="${letter.locked} ? 'View details' : 'Read letter'">Open</a>
+        </article>
+    </section>
+</main>
+ 
+<footer th:replace="~{fragments :: footer}"></footer>
+<script th:src="@{/js/app.js}" defer></script>
+</body>
+</html>

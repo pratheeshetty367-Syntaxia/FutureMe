@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments :: head('Something went wrong')}"></head>
+<body>
+<header th:replace="~{fragments :: navbar}"></header>
+ 
+<main class="container narrow">
+    <section class="empty-state">
+        <div class="empty-icon">&#9888;</div>
+        <h1>
+            <span th:text="${status}">404</span>
+            &ndash;
+            <span th:text="${error}">Not Found</span>
+        </h1>
+        <p th:text="${#strings.isEmpty(message)} ? 'Something went wrong while processing your request.' : ${message}">
+            Error message
+        </p>
+        <a class="btn btn-primary" th:href="@{/letters}">Back to my letters</a>
+    </section>
+</main>
+ 
+<footer th:replace="~{fragments :: footer}"></footer>
+</body>
+</html>
+
